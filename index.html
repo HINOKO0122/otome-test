@@ -489,23 +489,27 @@ const scenes = [
 
   // タイプ定義
   const types = {
-    god: {
-      name: "神対応・スパダリタイプ",
-      desc: "乙女心を100%理解している完璧な存在！言葉の裏にある微細な感情の変化を見逃さず、常に彼女が求めている最高の対応ができます。まさに少女漫画のヒーローそのものです。"
-    },
-    oresama: {
-      name: "自信家・俺様系タイプ",
-      desc: "自分の魅力を理解しつつも、たまに強引になりがちなタイプ。自分のペースに巻き込みつつも、要所でキュンとさせるツボを押さえています。"
-    },
-    soushoku: {
-      name: "誠実な草食系タイプ",
-      desc: "優しくて誠実ですが、あと一歩相手の踏み込んだ本音に気づけないことがあるタイプ。悪気はないものの、相手の「察してほしい」サインを見逃しがちです。"
-    },
-    鈍感: {
-      name: "超絶・天然鈍感タイプ",
-      desc: "乙女心という名の迷宮で完全に迷子になっている状態。言葉通りに受け取りすぎてしまい、相手をヤキモキさせることが多いかも？もう少し裏の感情に注目してみましょう。"
-    }
-  };
+  god: {
+    name: "👑 乙女心の理解者・神対応スパダリ",
+    desc: "パーフェクト！言葉の裏にある彼女の微細なSOSや甘えたいサインを100%察知し、最高の対応ができる神レベルの男性です。彼女にとってあなたは唯一無二のヒーローです。"
+  },
+  good: {
+    name: "🌸 頼れる爽やか彼氏タイプ",
+    desc: "乙女心をしっかり理解できている優良タイプ！たまに外すことはあっても、彼女を思いやる気持ちとデリカシーを兼ね備えています。安心して付き合える好印象男子です。"
+  },
+  indifferent: {
+    name: "😐 つれないマイペース・無関心男",
+    desc: "悪気はないものの、彼女のサインに対して「つれない対応」や「興味なさげな返答」をしがち。害はないですが、「本当に私のこと好きなの？」と不安にさせているかも。"
+  },
+  nondeli: {
+    name: "💣 悪気ゼロの爆弾魔・ノンデリ男",
+    desc: "デリカシーが欠如しており、悪気なく相手を傷つけたりモヤっとさせる発言を連発していませんか？正論やアドバイスはいりません。今すぐ「共感と配慮」を学びましょう。"
+  },
+  shitagokoro: {
+    name: "⚠️ 下心全開・危険人物バイオハザード",
+    desc: "乙女心どころか、自分の欲望が透けて見えすぎて引かれている可能性が大！どんなシーンでも下心に結びつけようとしていませんか？彼女を大切にしたいなら、まずは誠実さを身につけましょう。"
+  }
+};
 
   let currentScene = 0;
   let totalScore = 0;
@@ -580,14 +584,21 @@ const scenes = [
     // タイプ判定
     let resultType;
     if (percentage >= 85) {
-      resultType = types.god;
-    } else if (percentage >= 65) {
-      resultType = types.oresama;
-    } else if (percentage >= 40) {
-      resultType = types.soushoku;
-    } else {
-      resultType = types.鈍感;
-    }
+    // 85%以上 (合計 +70点以上)：神対応
+    resultType = types.god;
+  } else if (percentage >= 65) {
+    // 65%〜84% (合計 +30点〜+69点)：爽やか彼氏
+    resultType = types.good;
+  } else if (percentage >= 45) {
+    // 45%〜64% (合計 -10点〜+29点)：無関心・マイペース
+    resultType = types.indifferent;
+  } else if (percentage >= 25) {
+    // 25%〜44% (合計 -50点〜-11点)：ノンデリ
+    resultType = types.nondeli;
+  } else {
+    // 24%以下 (合計 -51点以下)：下心全開（最低ライン）
+    resultType = types.shitagokoro;
+  }
     
     document.getElementById('result-type-name').innerText = resultType.name;
     document.getElementById('result-type-desc').innerText = resultType.desc;
