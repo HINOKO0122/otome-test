@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>乙女心理解度テスト 〜君の言葉が聴きたくて〜</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&family=Yuji+Syuku&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #ff758c;
+      --secondary-color: #ff7eb3;
+      --accent-color: #ffd1dc;
+      --text-color: #4a3e3d;
+      --bg-overlay: rgba(255, 255, 255, 0.88);
+      --box-shadow: 0 8px 32px rgba(255, 117, 140, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 12px;
+    }
+
+    /* ゲームコンテナ */
+    #game-container {
+      width: 100%;
+      max-width: 680px;
+      min-height: 580px;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      border: 3px solid #ffffff;
+      box-shadow: var(--box-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    /* 画面共通スタイル */
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 0.4s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* タイトル画面 */
+    #start-screen {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 0;
+    }
+
+    .title-sub {
+      font-size: 1rem;
+      color: #885566;
+      letter-spacing: 2px;
+      font-family: 'Yuji Syuku', serif;
+    }
+
+    .title-main {
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      color: #d81b60;
+      font-family: 'Yuji Syuku', serif;
+      text-shadow: 2px 2px 0px #ffffff;
+      line-height: 1.3;
+    }
+
+    .heart-icon {
+      font-size: 3rem;
+      animation: pulse 1.5s infinite ease-in-out;
+      display: inline-block;
+    }
+
+    /* ボタン共通 */
+    .btn {
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      font-size: 1.15rem;
+      font-weight: bold;
+      padding: 16px 32px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      outline: none;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 117, 140, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    /* 質問画面 */
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background-color: #ffe6eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      transition: width 0.3s ease;
+    }
+
+    .scene-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      color: #885566;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    /* ノベル風テキストウィンドウ */
+    .dialogue-box {
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #ffccd5;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+      min-height: 110px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      position: relative;
+    }
+
+    .dialogue-speaker {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #d81b60;
+      margin-bottom: 6px;
+    }
+
+    .dialogue-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #333;
+      white-space: pre-wrap;
+    }
+
+    /* 選択肢リスト */
+    .choices-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background: #ffffff;
+      border: 2px solid #ffb6c1;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 0.98rem;
+      color: #4a3e3d;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+    }
+
+    .choice-btn:hover {
+      background: #fff0f5;
+      border-color: var(--primary-color);
+      transform: translateX(4px);
+    }
+
+    /* 結果画面 */
+    #result-screen {
+      text-align: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 10px 0;
+    }
+
+    .result-score-title {
+      font-size: 1.1rem;
+      color: #885566;
+    }
+
+    .result-score {
+      font-size: 3.2rem;
+      font-weight: bold;
+      color: #d81b60;
+      font-family: 'Yuji Syuku', serif;
+      line-height: 1;
+      margin: 8px 0;
+    }
+
+    .result-type-box {
+      background: #ffffff;
+      border: 2px dashed var(--primary-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 10px 0;
+    }
+
+    .result-type-label {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .result-type-name {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #d81b60;
+      margin-bottom: 10px;
+    }
+
+    .result-type-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      text-align: left;
+      color: #555;
+    }
+
+    .share-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .x-share-btn {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .x-share-btn:hover {
+      background-color: #333333;
+    }
+
+    .retry-btn {
+      background: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .retry-btn:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* アニメーション */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- 1. スタート画面 -->
+  <div id="start-screen" class="screen active">
+    <div class="title-sub">〜君の言葉が聴きたくて〜</div>
+    <div class="title-main">乙女心理解度テスト</div>
+    <div class="heart-icon">💖</div>
+    <p style="font-size: 0.95rem; color: #666; line-height: 1.6; max-width: 80%;">
+      彼女の「本当の気持ち」に気づけていますか？<br>10のシチュエーションであなたの乙女心を試します。
+    </p>
+    <button class="btn" onclick="startGame()">診断をはじめる</button>
+  </div>
+
+  <!-- 2. クイズ画面 -->
+  <div id="quiz-screen" class="screen">
+    <div>
+      <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <div class="scene-header">
+        <span id="scene-num">Scene 1 / 10</span>
+        <span id="scene-tag">デート中</span>
+      </div>
+    </div>
+
+    <div class="dialogue-box">
+      <div id="dialogue-speaker" class="dialogue-speaker">彼女</div>
+      <div id="dialogue-text" class="dialogue-text">テキストがここに入ります。</div>
+    </div>
+
+    <div id="choices-container" class="choices-container">
+      <!-- JavaScriptで動的生成 -->
+    </div>
+  </div>
+
+  <!-- 3. 結果画面 -->
+  <div id="result-screen" class="screen">
+    <div class="result-score-title">あなたの乙女心理解度は…</div>
+    <div id="result-score" class="result-score">0%</div>
+
+    <div class="result-type-box">
+      <div class="result-type-label">あなたのアプローチタイプ</div>
+      <div id="result-type-name" class="result-type-name">診断中...</div>
+      <div id="result-type-desc" class="result-type-desc">説明テキスト...</div>
+    </div>
+
+    <div class="share-container">
+      <a id="x-share-link" class="x-share-btn" href="#" target="_blank" rel="noopener noreferrer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        結果をXでシェアする
+      </a>
+      <button class="retry-btn" onclick="resetGame()">もう一度テストする</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // シーンデータ (10問)
+  const scenes = [
+    {
+      tag: "カフェにて",
+      speaker: "彼女",
+      text: "「どっちのドレスがいいかな？こっちのピンクも可愛いけど、シックな黒も捨てがたいんだよね…」",
+      choices: [
+        { text: "「黒の方が大人っぽくて似合うと思うよ」と即答する", score: 0 },
+        { text: "「うーん、どっちも可愛いから迷うね！それぞれの良さがあるよ」と一緒に悩む", score: 10 },
+        { text: "「めんどくさいな、どっちでもいいんじゃない？」と言う", score: -10 }
+      ]
+    },
+    {
+      tag: "デートの別れ際",
+      speaker: "彼女",
+      text: "「あ〜あ、今日はすごく楽しかったな。…なんだか帰りたくなくなっちゃった」",
+      choices: [
+        { text: "「そうだね、終電遅れるからそろそろ駅に行こうか」と促す", score: -10 },
+        { text: "「僕もだよ。もう少しだけ一緒に散歩して帰ろうか？」と微笑む", score: 10 },
+        { text: "「じゃあ僕の家に泊まっていく？」とすぐに誘う", score: 0 }
+      ]
+    },
+    {
+      tag: "部屋でまったり",
+      speaker: "彼女",
+      text: "「ねえ、最近ちょっと太っちゃった気がするんだよね…」",
+      choices: [
+        { text: "「全然そんなことないよ！今のままでも十分魅力的だよ」と否定する", score: 10 },
+        { text: "「確かに少しふっくらしたかも？一緒に運動しようか」と提案する", score: -10 },
+        { text: "「間食減らせばすぐ戻るんじゃない？」とアドバイスする", score: 0 }
+      ]
+    },
+    {
+      tag: "街中で歩いている時",
+      speaker: "彼女",
+      text: "（少し寒そうに肩をすくめて、手をギュッと握りしめている）",
+      choices: [
+        { text: "「寒い？上着貸そうか？」と気遣う", score: 5 },
+        { text: "「寒そうだね」と共感だけする", score: -10 },
+        { text: "黙って彼女の手を取って、自分のポケットに一緒に入れる", score: 10 }
+      ]
+    },
+    {
+      tag: "体調不良の時",
+      speaker: "彼女",
+      text: "「今日、熱が出ちゃって…ごめんね、せっかくのデートキャンセルになっちゃって」",
+      choices: [
+        { text: "「気にするなよ！ゆっくり休んでね」とあっさり引き下がる", score: 0 },
+        { text: "「大丈夫！？必要なもの買って、ドアの前に置いておこうか？」と気遣う", score: 10 },
+        { text: "「じゃあ暇だから今から家に行って看病してあげるね」と押しかける", score: -10 }
+      ]
+    },
+    {
+      tag: "レストランで",
+      speaker: "彼女",
+      text: "「一口食べる？これすっごく美味しいよ！」（スプーンを出してくる）",
+      choices: [
+        { text: "「ありがとう！」と言って、嬉しそうにあ〜んしてもらう", score: 10 },
+        { text: "「自分の分があるから大丈夫だよ」と断る", score: -10 },
+        { text: "スプーンを奪って自分で食べる", score: 0 }
+      ]
+    },
+    {
+      tag: "落ち込んでいる時",
+      speaker: "彼女",
+      text: "「今日、仕事で大失敗しちゃってさ…私って本当にダメだな」",
+      choices: [
+        { text: "「どこが悪かったのか原因を整理してみようよ」と分析する", score: -10 },
+        { text: "「そんなことないよ。頑張ってるの知ってるよ」と丸ごと肯定して寄り添う", score: 10 },
+        { text: "「まあ次頑張ればいいじゃん！」と明るく励ます", score: 0 }
+      ]
+    },
+    {
+      tag: "LINEでのやり取り",
+      speaker: "彼女",
+      text: "「今日ね、街で可愛いカフェ見つけたんだ〜！」（写真つき）",
+      choices: [
+        { text: "「いいね！今度一緒に行ってみようよ」とデートに繋げる", score: 10 },
+        { text: "「へー、おしゃれなお店だね」とスタンプだけ送る", score: 0 },
+        { text: "既読をつけてそのまま放置する", score: -10 }
+      ]
+    },
+    {
+      tag: "髪型を変えた日",
+      speaker: "彼女",
+      text: "「ねえねえ、何かいつもと違うところ、気づく…？」",
+      choices: [
+        { text: "「髪切った？似合ってる、すごく可愛いよ」と即座に褒める", score: 10 },
+        { text: "「うーん…メイク変えた？服？」と当てずっぽうで答える", score: -10 },
+        { text: "「ごめん、どこが変わったか分からないや」と正直に言う", score: 0 }
+      ]
+    },
+    {
+      tag: "喧嘩気味のとき",
+      speaker: "彼女",
+      text: "「もういい！私のことなんてほっといて！」（プイッと横を向く）",
+      choices: [
+        { text: "言われた通りにして、静かに立ち去る", score: -10 },
+        { text: "「ほっとけるわけないじゃん」と優しく引き留めて理由を聞く", score: 10 },
+        { text: "「なんで怒ってるの？」と詰問する", score: 0 }
+      ]
+    }
+  ];
+
+  // タイプ定義
+  const types = {
+    god: {
+      name: "神対応・スパダリタイプ",
+      desc: "乙女心を100%理解している完璧な存在！言葉の裏にある微細な感情の変化を見逃さず、常に彼女が求めている最高の対応ができます。まさに少女漫画のヒーローそのものです。"
+    },
+    oresama: {
+      name: "自信家・俺様系タイプ",
+      desc: "自分の魅力を理解しつつも、たまに強引になりがちなタイプ。自分のペースに巻き込みつつも、要所でキュンとさせるツボを押さえています。"
+    },
+    soushoku: {
+      name: "誠実な草食系タイプ",
+      desc: "優しくて誠実ですが、あと一歩相手の踏み込んだ本音に気づけないことがあるタイプ。悪気はないものの、相手の「察してほしい」サインを見逃しがちです。"
+    },
+    鈍感: {
+      name: "超絶・天然鈍感タイプ",
+      desc: "乙女心という名の迷宮で完全に迷子になっている状態。言葉通りに受け取りすぎてしまい、相手をヤキモキさせることが多いかも？もう少し裏の感情に注目してみましょう。"
+    }
+  };
+
+  let currentScene = 0;
+  let totalScore = 0;
+
+  // ゲーム開始
+  function startGame() {
+    currentScene = 0;
+    totalScore = 0;
+    switchScreen('quiz-screen');
+    renderScene();
+  }
+
+  // 画面切り替え
+  function switchScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
+
+  // シーン描写
+  function renderScene() {
+    const scene = scenes[currentScene];
+    
+    // プログレスバー
+    const progress = ((currentScene + 1) / scenes.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+    
+    // ヘッダー情報
+    document.getElementById('scene-num').innerText = `Scene ${currentScene + 1} / ${scenes.length}`;
+    document.getElementById('scene-tag').innerText = scene.tag;
+    
+    // ダイアログ
+    document.getElementById('dialogue-speaker').innerText = scene.speaker;
+    document.getElementById('dialogue-text').innerText = scene.text;
+    
+    // 選択肢生成
+    const choicesContainer = document.getElementById('choices-container');
+    choicesContainer.innerHTML = '';
+    
+    scene.choices.forEach((choice) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerText = choice.text;
+      btn.onclick = () => selectChoice(choice.score);
+      choicesContainer.appendChild(btn);
+    });
+  }
+
+  // 選択肢クリック処理
+  function selectChoice(score) {
+    totalScore += score;
+    currentScene++;
+    
+    if (currentScene < scenes.length) {
+      renderScene();
+    } else {
+      showResult();
+    }
+  }
+
+  // 結果表示
+  function showResult() {
+    switchScreen('result-screen');
+    
+    // スコア計算 (理論上の最大100pt, 最小-100ptを0〜100%に標準化)
+    // 最大得点は 10点×10問 = 100点
+    // 最小得点は -10点×10問 = -100点
+    let percentage = Math.round(((totalScore + 100) / 200) * 100);
+    percentage = Math.max(0, Math.min(100, percentage)); // 0~100に収める
+    
+    document.getElementById('result-score').innerText = `${percentage}%`;
+    
+    // タイプ判定
+    let resultType;
+    if (percentage >= 85) {
+      resultType = types.god;
+    } else if (percentage >= 65) {
+      resultType = types.oresama;
+    } else if (percentage >= 40) {
+      resultType = types.soushoku;
+    } else {
+      resultType = types.鈍感;
+    }
+    
+    document.getElementById('result-type-name').innerText = resultType.name;
+    document.getElementById('result-type-desc').innerText = resultType.desc;
+    
+    // X共有リンク生成
+    setupXShare(percentage, resultType.name);
+  }
+
+  // X（Twitter）共有URLの設定
+  function setupXShare(percentage, typeName) {
+    const siteUrl = window.location.href; // 現在のGitHub PagesのURLを取得
+    const text = `【乙女心理解度テスト】\n私の乙女心理解度は【${percentage}%】でした！\nタイプ：${typeName}\n\nあなたも乙女心が分かっているかテストしてみよう！\n`;
+    const hashtags = "乙女心理解度テスト,乙女ゲーム";
+    
+    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(siteUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+    
+    document.getElementById('x-share-link').href = shareUrl;
+  }
+
+  // リセット
+  function resetGame() {
+    switchScreen('start-screen');
+  }
+</script>
+
+</body>
+</html>
